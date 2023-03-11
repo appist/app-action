@@ -209,8 +209,9 @@ async function run(): Promise<void> {
 	try {
 		const githubToken = getInput("githubToken", { required: true });
 		const secretKey = getInput("secretKey", { required: true });
-		const workingDirectory =
-			getInput("workingDirectory", { required: false }) ?? ".";
+		const workingDirectory = `${process.cwd()}${getInput("workingDirectory", {
+			required: false,
+		})}`;
 		const octokit = getOctokit(githubToken);
 
 		const secrets = await getAppistDeploymentMeta(secretKey);
