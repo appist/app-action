@@ -25397,9 +25397,12 @@ async function run() {
   try {
     const githubToken = (0, import_core.getInput)("githubToken", { required: true });
     const secretKey = (0, import_core.getInput)("secretKey", { required: true });
-    const workingDirectory = `${process.cwd()}${(0, import_core.getInput)("workingDirectory", {
+    let workingDirectory = (0, import_core.getInput)("workingDirectory", {
       required: false
-    })}`;
+    });
+    if (!workingDirectory.startsWith("/")) {
+      workingDirectory = `${process.cwd()}/${workingDirectory}`;
+    }
     const octokit = (0, import_github.getOctokit)(githubToken);
     const secrets = await getAppistDeploymentMeta(secretKey);
     if (!(secrets?.cloudflare?.accountId && secrets?.cloudflare?.apiToken && secrets?.cloudflare?.directory && secrets?.cloudflare?.projectName)) {
