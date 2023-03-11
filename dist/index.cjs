@@ -25320,7 +25320,7 @@ async function getCfDeployment(branch, commitHash, deploymentMeta, environment) 
     (deployment) => deployment.environment === environment && deployment.deployment_trigger.metadata.branch === branch && deployment.deployment_trigger.metadata.commit_hash === commitHash
   );
 }
-async function createDeployment(branch, commitHash, commitMessage, deploymentMeta, octokit, prNumber) {
+async function createDeployment(workingDirectory, branch, commitHash, commitMessage, deploymentMeta, octokit, prNumber) {
   const isProduction = branch === deploymentMeta.cloudflare?.productionBranch;
   const environment = isProduction ? "production" : "preview";
   const githubDeployment = await octokit.rest.repos.createDeployment({
@@ -25333,10 +25333,9 @@ async function createDeployment(branch, commitHash, commitMessage, deploymentMet
     repo: import_github.context.repo.repo,
     required_contexts: []
   });
-  await src_default.in(process.cwd())`
+  await src_default.in(workingDirectory)`
     $ export CLOUDFLARE_ACCOUNT_ID="${deploymentMeta.cloudflare?.accountId}"
     $ export CLOUDFLARE_API_TOKEN="${deploymentMeta.cloudflare?.apiToken}"
-    $$ ls -al
     $$ ./node_modules/.bin/wrangler pages publish ${deploymentMeta.cloudflare?.directory} --branch="${branch}" \
        --commit-hash="${commitHash}" --commit-message="${commitMessage}" \
        --project-name="${deploymentMeta.cloudflare?.projectName}"
@@ -25400,7 +25399,6 @@ async function run() {
     const secretKey = (0, import_core.getInput)("secretKey", { required: true });
     const workingDirectory = (0, import_core.getInput)("workingDirectory", { required: false }) ?? ".";
     const octokit = (0, import_github.getOctokit)(githubToken);
-    await src_default.in(process.cwd())`$$ cd ${workingDirectory}`;
     const secrets = await getAppistDeploymentMeta(secretKey);
     if (!(secrets?.cloudflare?.accountId && secrets?.cloudflare?.apiToken && secrets?.cloudflare?.directory && secrets?.cloudflare?.projectName)) {
       throw new Error("Unable to retrieve the Appist's deployment meta.");
@@ -25410,6 +25408,7 @@ async function run() {
       case "push":
         const pushPayload = payload;
         await createDeployment(
+          workingDirectory,
           ref.replace("refs/heads/", ""),
           sha,
           pushPayload?.head_commit?.message || "",
@@ -25437,6 +25436,7 @@ async function run() {
           case "reopened":
           case "synchronize":
             await createDeployment(
+              workingDirectory,
               prPayload.pull_request.head.ref.replace("refs/heads/", ""),
               sha,
               data[0]?.commit?.message || "",

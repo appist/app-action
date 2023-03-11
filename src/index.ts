@@ -113,6 +113,7 @@ async function getCfDeployment(
 }
 
 async function createDeployment(
+	workingDirectory: string,
 	branch: string,
 	commitHash: string,
 	commitMessage: string,
@@ -133,10 +134,9 @@ async function createDeployment(
 		required_contexts: [],
 	});
 
-	await shellac.in(process.cwd())`
+	await shellac.in(workingDirectory)`
     $ export CLOUDFLARE_ACCOUNT_ID="${deploymentMeta.cloudflare?.accountId}"
     $ export CLOUDFLARE_API_TOKEN="${deploymentMeta.cloudflare?.apiToken}"
-    $$ ls -al
     $$ ./node_modules/.bin/wrangler pages publish ${deploymentMeta.cloudflare?.directory} --branch="${branch}" \
        --commit-hash="${commitHash}" --commit-message="${commitMessage}" \
        --project-name="${deploymentMeta.cloudflare?.projectName}"
@@ -212,7 +212,6 @@ async function run(): Promise<void> {
 		const workingDirectory =
 			getInput("workingDirectory", { required: false }) ?? ".";
 		const octokit = getOctokit(githubToken);
-		await shellac.in(process.cwd())`$$ cd ${workingDirectory}`;
 
 		const secrets = await getAppistDeploymentMeta(secretKey);
 		if (
@@ -232,6 +231,7 @@ async function run(): Promise<void> {
 			case "push":
 				const pushPayload = payload as PushEvent;
 				await createDeployment(
+					workingDirectory,
 					ref.replace("refs/heads/", ""),
 					sha,
 					pushPayload?.head_commit?.message || "",
@@ -264,6 +264,7 @@ async function run(): Promise<void> {
 					case "reopened":
 					case "synchronize":
 						await createDeployment(
+							workingDirectory,
 							prPayload.pull_request.head.ref.replace("refs/heads/", ""),
 							sha,
 							data[0]?.commit?.message || "",
