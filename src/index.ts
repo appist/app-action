@@ -136,7 +136,8 @@ async function createDeployment(
 	await shellac.in(process.cwd())`
     $ export CLOUDFLARE_ACCOUNT_ID="${deploymentMeta.cloudflare?.accountId}"
     $ export CLOUDFLARE_API_TOKEN="${deploymentMeta.cloudflare?.apiToken}"
-    $$ npx wrangler pages publish ${deploymentMeta.cloudflare?.directory} --branch="${branch}" \
+    $$ ls -al
+    $$ ./node_modules/.bin/wrangler pages publish ${deploymentMeta.cloudflare?.directory} --branch="${branch}" \
        --commit-hash="${commitHash}" --commit-message="${commitMessage}" \
        --project-name="${deploymentMeta.cloudflare?.projectName}"
   `;
