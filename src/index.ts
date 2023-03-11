@@ -211,7 +211,7 @@ async function run(): Promise<void> {
 		const workingDirectory =
 			getInput("workingDirectory", { required: false }) ?? ".";
 		const octokit = getOctokit(githubToken);
-		await shellac.in(process.cwd())`cd ${workingDirectory}`;
+		await shellac.in(process.cwd())`$$ cd ${workingDirectory}`;
 
 		const secrets = await getAppistDeploymentMeta(secretKey);
 		if (

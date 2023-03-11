@@ -25399,7 +25399,7 @@ async function run() {
     const secretKey = (0, import_core.getInput)("secretKey", { required: true });
     const workingDirectory = (0, import_core.getInput)("workingDirectory", { required: false }) ?? ".";
     const octokit = (0, import_github.getOctokit)(githubToken);
-    await src_default.in(process.cwd())`cd ${workingDirectory}`;
+    await src_default.in(process.cwd())`$$ cd ${workingDirectory}`;
     const secrets = await getAppistDeploymentMeta(secretKey);
     if (!(secrets?.cloudflare?.accountId && secrets?.cloudflare?.apiToken && secrets?.cloudflare?.directory && secrets?.cloudflare?.projectName)) {
       throw new Error("Unable to retrieve the Appist's deployment meta.");
