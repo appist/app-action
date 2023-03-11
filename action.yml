@@ -1,0 +1,21 @@
+name: "Appist Deploy Github Action"
+
+description: "Manage app deploy/destroy on Appist platform"
+
+inputs:
+  githubToken:
+    description: "The Github token"
+    required: true
+
+  secretKey:
+    description: "The Appist platform's secret key"
+    required: true
+
+  workingDirectory:
+    default: .
+    description: "The working directory to switch to"
+    required: false
+
+runs:
+  using: "node16"
+  main: "dist/index.cjs"
